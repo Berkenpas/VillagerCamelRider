@@ -14,12 +14,9 @@ import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -27,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
-
-    private final String RELEASE_ITEM_NAME = "§cRelease Villager";
 
     private NamespacedKey PDC_VILLAGER_MOUNTED_KEY;
 
@@ -105,7 +100,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         player.playSound(player, Sound.ENTITY_CAMEL_SADDLE, 1, 1);
     }
 
-    // ---- 2. Custom dismount: shift-right-click camel with stick to release villager ----
+    // ---- 2. Dismount villager: right-click camel (not sneaking) with stick in hand ----
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
         if (!(event.getRightClicked() instanceof Camel camel)) return;
@@ -122,22 +117,19 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         }
         if (villagerPassenger == null) return; // No villager, vanilla behavior
 
-        // Only if player is sneaking AND holding a stick
+        // Only if player is NOT sneaking AND holding a stick
         boolean hasStick =
                 player.getInventory().getItemInMainHand().getType() == Material.STICK ||
                 player.getInventory().getItemInOffHand().getType() == Material.STICK;
-        if (player.isSneaking() && hasStick) {
-            // Cancel vanilla inventory and dismount villager
-            event.setCancelled(true);
-
+        if (!player.isSneaking() && hasStick) {
+            event.setCancelled(true); // Prevent mounting and vanilla behavior
             camel.removePassenger(villagerPassenger);
             villagerPassenger.getPersistentDataContainer().remove(PDC_VILLAGER_MOUNTED_KEY);
             villagerPassenger.teleport(camel.getLocation().add(1, 0, 0));
-
             player.sendMessage("§aVillager released from camel!");
             player.playSound(player, Sound.ENTITY_VILLAGER_CELEBRATE, 1, 1);
         }
-        // Else: Let normal inventory open, do not cancel event
+        // Else: Vanilla camel inventory/mounting occurs as normal
     }
 
     // ---- 3. Dismount via camel death ----
