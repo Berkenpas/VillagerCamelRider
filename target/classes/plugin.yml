@@ -1,0 +1,6 @@
+name: VillagerCamelRider
+main: dev.berkenpas.vcr.VillagerCamelRiderPlugin
+version: 1.0
+api-version: 1.21
+author: Joshua Berkenpas
+description: Allow villagers to ride camels as passengers!
