@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.berkenpas</groupId>
     <artifactId>VillagerCamelRider</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>VillagerCamelRider</name>
     <description>Allow villagers to ride camels as passengers!</description>
     <url>https://github.com/yourname/VillagerCamelRider</url> <!-- Optional -->

@@ -34,24 +34,17 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         getLogger().info("VillagerCamelRider enabled.");
     }
 
-    // 1. Mount villager on camel using a lead
+    // 1. Mount villager on camel: as long as camel is leashed to player (no lead in hand needed)
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        // Only trigger if right-clicking a villager
         if (!(event.getRightClicked() instanceof Villager villager)) return;
-
         Player player = event.getPlayer();
 
-        // Must hold a lead in either hand
-        if (!player.getInventory().getItemInMainHand().getType().equals(Material.LEAD) &&
-            !player.getInventory().getItemInOffHand().getType().equals(Material.LEAD)) return;
-
-        // Find nearest camel on a lead (owned by this player), within 6 blocks
+        // Find nearest camel leashed to the player within 6 blocks
         Camel nearestCamel = null;
         double closest = 6.0;
         for (Entity ent : villager.getNearbyEntities(6, 6, 6)) {
             if (!(ent instanceof Camel camel)) continue;
-            // Check if the camel is leashed to this player
             if (camel.isLeashed() && camel.getLeashHolder() instanceof Player leashHolder
                 && leashHolder.getUniqueId().equals(player.getUniqueId())) {
                 double dist = camel.getLocation().distance(villager.getLocation());
@@ -92,9 +85,10 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         // Tag villager as "mounted by plugin" to control behavior
         villager.getPersistentDataContainer().set(PDC_VILLAGER_MOUNTED_KEY, PersistentDataType.BYTE, (byte) 1);
 
-        // Unleash camel and villager if leashed
-        if (nearestCamel.isLeashed()) nearestCamel.setLeashHolder(null);
+        // Unleash villager if leashed
         if (villager.isLeashed()) villager.setLeashHolder(null);
+
+        // (Do NOT consume or remove any leads!)
 
         player.sendMessage("§aVillager is now riding your camel!");
         player.playSound(player, Sound.ENTITY_CAMEL_SADDLE, 1, 1);
