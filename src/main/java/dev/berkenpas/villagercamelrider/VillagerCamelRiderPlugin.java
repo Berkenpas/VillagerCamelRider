@@ -34,7 +34,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         getLogger().info("VillagerCamelRider enabled.");
     }
 
-    // ---- 1. Mount villager on camel ----
+    // 1. Mount villager on camel using a lead
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         // Only trigger if right-clicking a villager
@@ -42,7 +42,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
 
         Player player = event.getPlayer();
 
-        // Must hold a lead in hand
+        // Must hold a lead in either hand
         if (!player.getInventory().getItemInMainHand().getType().equals(Material.LEAD) &&
             !player.getInventory().getItemInOffHand().getType().equals(Material.LEAD)) return;
 
@@ -100,7 +100,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         player.playSound(player, Sound.ENTITY_CAMEL_SADDLE, 1, 1);
     }
 
-    // ---- 2. Dismount villager: right-click camel (not sneaking) with stick in hand ----
+    // 2. Dismount villager: right-click camel (not sneaking) with stick in hand
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
         if (!(event.getRightClicked() instanceof Camel camel)) return;
@@ -122,7 +122,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
                 player.getInventory().getItemInMainHand().getType() == Material.STICK ||
                 player.getInventory().getItemInOffHand().getType() == Material.STICK;
         if (!player.isSneaking() && hasStick) {
-            event.setCancelled(true); // Prevent mounting and vanilla behavior
+            // Do NOT cancel event, allow player to mount camel as usual
             camel.removePassenger(villagerPassenger);
             villagerPassenger.getPersistentDataContainer().remove(PDC_VILLAGER_MOUNTED_KEY);
             villagerPassenger.teleport(camel.getLocation().add(1, 0, 0));
@@ -132,7 +132,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         // Else: Vanilla camel inventory/mounting occurs as normal
     }
 
-    // ---- 3. Dismount via camel death ----
+    // 3. Dismount via camel death
     @EventHandler
     public void onCamelDeath(EntityDeathEvent event) {
         if (!(event.getEntity() instanceof Camel camel)) return;
@@ -148,7 +148,7 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    // ---- 4. Prevent villager from dismounting on their own ----
+    // 4. Prevent villager from dismounting on their own
     @EventHandler
     public void onVillagerDismount(EntityDismountEvent event) {
         if (!(event.getEntity() instanceof Villager villager)) return;
@@ -159,15 +159,13 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    // ---- 5. Ensure villager is passive while mounted (no walk, no despawn, no panic) ----
-    // In modern Paper, villagers won't despawn. The ride state disables AI by default.
-    // But for extra safety:
+    // 5. Extra: nothing needed on player quit
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        // Edge case: Player logs out with a villager on camel, nothing to do since AI is paused on ride.
+        // No cleanup needed.
     }
 
-    // --- Utility class for custom inventory holder (not used in this MVP, but left for future UI) ---
+    // Not used, but here for future extensibility
     private static class CamelHolder implements InventoryHolder {
         final Camel camel;
         CamelHolder(Camel camel) { this.camel = camel; }
