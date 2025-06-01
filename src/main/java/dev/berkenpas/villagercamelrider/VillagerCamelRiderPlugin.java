@@ -55,27 +55,23 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
             }
         }
         if (nearestCamel == null) {
-            player.sendMessage("§cNo camel on a lead nearby!");
             return;
         }
 
         // Is there room? (camel can have max 2 passengers)
         if (nearestCamel.getPassengers().size() >= 2) {
-            player.sendMessage("§eThat camel is full!");
             return;
         }
 
         // If camel already has a villager, block (only allow 1 villager at a time)
         for (Entity passenger : nearestCamel.getPassengers()) {
             if (passenger instanceof Villager) {
-                player.sendMessage("§eA villager is already riding this camel.");
                 return;
             }
         }
 
         // Mount the villager!
         if (villager.getVehicle() != null) {
-            player.sendMessage("§eThat villager is already riding something!");
             return;
         }
 
@@ -90,7 +86,6 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
 
         // (Do NOT consume or remove any leads!)
 
-        player.sendMessage("§aVillager is now riding your camel!");
         player.playSound(player, Sound.ENTITY_CAMEL_SADDLE, 1, 1);
     }
 
@@ -120,7 +115,6 @@ public class VillagerCamelRiderPlugin extends JavaPlugin implements Listener {
             camel.removePassenger(villagerPassenger);
             villagerPassenger.getPersistentDataContainer().remove(PDC_VILLAGER_MOUNTED_KEY);
             villagerPassenger.teleport(camel.getLocation().add(1, 0, 0));
-            player.sendMessage("§aVillager released from camel!");
             player.playSound(player, Sound.ENTITY_VILLAGER_CELEBRATE, 1, 1);
         }
         // Else: Vanilla camel inventory/mounting occurs as normal
